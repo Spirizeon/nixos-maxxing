@@ -4,15 +4,8 @@ A modular NixOS system configuration with security hardening, NVIDIA GPU support
 
 ## Overview
 
-This configuration uses a modular approach, separating concerns into `modules/`:
-- `boot.nix` - Bootloader, kernel params, sysctl hardening, module blacklisting
-- `desktop.nix` - X server, GNOME, audio, printing, security features
-- `hardware.nix` - GPU drivers (NVIDIA + AMD), Bluetooth
-- `networking.nix` - Hostname, NetworkManager, timezone, locale
-- `packages.nix` - System-wide package selection
-- `users.nix` - User account and Docker
+<img width="4872" height="500px" alt="diagram(1)" src="https://github.com/user-attachments/assets/52a91a0e-d428-464b-8d28-87d3c20cf354" />
 
----
 
 ## Module Details
 
