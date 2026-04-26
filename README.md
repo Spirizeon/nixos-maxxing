@@ -8,7 +8,8 @@ This is my NixOS configuration, reimagined with **dendritic patterns** — a fan
 
 Think of it like organizing your room: instead of throwing everything into one drawer, you use shelves. Each shelf has a purpose. That's what flakes do for your OS config.
 
-<img width="4872" height="500px" alt="diagram(1)" src="https://github.com/user-attachments/assets/52a91a0e-d428-464b-8d28-87d3c20cf354" />
+
+<img width="4872" height="500px" alt="diagram(2)" src="https://github.com/user-attachments/assets/69203486-69f3-49e1-a3f6-8800ffad8bea" />
 
 ## The Dendritic Structure
 
