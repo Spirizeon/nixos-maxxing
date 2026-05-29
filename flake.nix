@@ -1,46 +1,167 @@
 {
-  description = "NixOS configuration with dendritic flake structure";
+  description = "Nixos config flake";
 
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-23.11";
-    nixpkgs-unstable.url = "nixpkgs/master";
-    flake-utils.url = "github:numtide/flake-utils";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
+    hyprpolkitagent.url = "github:hyprwm/hyprpolkitagent";
+    nur.url = "github:nix-community/NUR";
+    home-manager.url = "github:nix-community/home-manager";
+    nixvim.url = "github:nix-community/nixvim";
+    agenix.url = "github:ryantm/agenix";
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    disko = {
+      url = "github:nix-community/disko/latest";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    hjem = {
+      url = "github:feel-co/hjem";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    matugen.url = "github:InioX/matugen";
+
+    hyprland.url = "github:hyprwm/Hyprland";
+
+    mcsr-nixos = {
+      url = "https://git.uku3lig.net/uku/mcsr-nixos/archive/main.tar.gz";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    stylix = {
+      url = "github:danth/stylix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    nixcord.url = "github:kaylorben/nixcord";
+
+    nixmate.url = "github:daskladas/nixmate";
+
+    nixflix = {
+      url = "github:kiriwalawren/nixflix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    nix-minecraft.url = "github:Infinidoge/nix-minecraft";
+
+    noctalia = {
+      url = "github:noctalia-dev/noctalia-shell";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    moonlight = {
+      url = "github:moonlight-mod/moonlight";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    bakkesmod-nix.url = "github:AddG0/bakkesmod-nix";
+
+    xremap-flake.url = "github:xremap/nix-flake";
+
+    zen-browser.url = "github:0xc000022070/zen-browser-flake";
+
+    nix-gaming.url = "github:fufexan/nix-gaming";
+
+    # Star Citizen
+    nix-citizen.url = "github:LovingMelody/nix-citizen";
+
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, flake-utils }:
-    flake-utils.lib.eachDefaultSystem (
-      system: let
-        pkgs = import nixpkgs {
-          inherit system;
-        };
-      in {
-        devShells.default = pkgs.mkShell {
-          buildInputs = with pkgs; [
-            nix
-            git
+  outputs =
+    {
+      self,
+      nixpkgs,
+      chaotic,
+      nix-citizen,
+      ...
+    }@inputs:
+    {
+
+      # Expose NixOS configurations
+      nixosConfigurations.berzilinux = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = { inherit self inputs; };
+        modules = [
+          ./hosts/berzilinux/configuration.nix
+          inputs.stylix.nixosModules.stylix
+          inputs.home-manager.nixosModules.default
+          chaotic.nixosModules.default
+        ];
+      };
+
+      nixosConfigurations.terra = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = { inherit self inputs; };
+        modules = [
+          ./hosts/terra/configuration.nix
+          inputs.stylix.nixosModules.stylix
+          inputs.home-manager.nixosModules.default
+          # inputs.agenix.nixosModules.default
+          chaotic.nixosModules.default
+          inputs.disko.nixosModules.disko
+
+          nix-citizen.nixosModules.default
+          {
+            programs.rsi-launcher = {
+              # Enables the star citizen module
+              enable = true;
+              umu.enable = true;
+              gamescope = {
+                enable = true;
+                args = [
+                  "-f"
+                  "-w 3840"
+                  "-h 1600"
+                  "-W 3840"
+                  "-H 1600"
+                  "--force-grab-cursor"
+                ];
+              };
+
+              # Additional commands before the game starts
+              preCommands = ''
+                export DXVK_HUD=compiler;
+                export MANGOHUD=1;
+              '';
+              # # This option is enabled by default
+              # #  Configures your system to meet some of the requirements to run star-citizen
+              # # Set `vm.max_map_count` default to `16777216` (sysctl(8))
+              # #Set `fs.file-max` default to `524288` (sysctl(8))
+              # #Also sets `security.pam.loginLimits` to increase hard (limits.conf(5))
+              # # Changes outlined in  https://github.com/starcitizen-lug/knowledge-base/wiki/Manual-Installation#prerequisites
+              # setLimits = false;
+            };
+          }
+        ];
+      };
+
+      # Standalone home-manager: run `home-manager switch --flake /home/berzi/nixos#berzi`
+      homeConfigurations = {
+        "berzi" = inputs.home-manager.lib.homeManagerConfiguration {
+          pkgs = import nixpkgs {
+            system = "x86_64-linux";
+            config.allowUnfree = true;
+            overlays = [
+              (final: prev: {
+                nur = import inputs.nur {
+                  nurpkgs = prev;
+                  pkgs = prev;
+                };
+              })
+            ];
+          };
+          modules = [
+            inputs.stylix.homeModules.stylix
+            ./hosts/berzilinux/home.nix
           ];
-        };
-      }
-    ) // {
-      nixosConfigurations = import ./hosts self;
-      nixosModules = {
-        boot = (import ./nixos/boot/default.nix { inherit self; }).nixosModule;
-        hardware = (import ./nixos/hardware/default.nix { inherit self; }).nixosModule;
-        networking = (import ./nixos/networking/default.nix { inherit self; }).nixosModule;
-        desktop = (import ./nixos/desktop/default.nix { inherit self; }).nixosModule;
-        packages = (import ./nixos/packages/default.nix { inherit self; }).nixosModule;
-        users = (import ./nixos/users/default.nix { inherit self; }).nixosModule;
-      };
-
-      lib = {
-        nixpkgs = nixpkgs;
-        nixpkgs-unstable = nixpkgs-unstable;
-      };
-
-      templates = {
-        default = {
-          path = ./templates;
-          description = "NixOS flake templates";
+          extraSpecialArgs = {
+            inherit self inputs;
+          };
         };
       };
     };
