@@ -2,7 +2,7 @@
 
 A heavily modularized, declarative NixOS configuration managing two hosts — a laptop and a desktop — with Nix Flakes, Home Manager, Stylix theming, and a curated selection of tools for development, gaming, and media.
 
----
+<img width="1920" height="1076" alt="image" src="https://github.com/user-attachments/assets/bb937333-41ef-46cb-85a0-05c533db7d39" />
 
 ## Index
 
@@ -39,13 +39,7 @@ A heavily modularized, declarative NixOS configuration managing two hosts — a 
 
 ---
 
-## Screenshots
 
-<!-- Add screenshots of your desktop here. Recommended: include at least one full desktop shot, one showing the bar/shell, and one of a configured editor/terminal. -->
-
-| Desktop | Bar | Terminal |
-|---------|-----|----------|
-| *TODO* | *TODO* | *TODO* |
 
 ---
 
